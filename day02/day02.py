@@ -1,5 +1,5 @@
-# adventOfCode 2019 day 02
-# https://adventofcode.com/2019/day/02
+# adventOfCode 2015 day 02
+# https://adventofcode.com/2015/day/02
 
 from itertools import combinations
 import math
