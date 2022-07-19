@@ -1,8 +1,8 @@
-# adventOfCode 2019 day 01
-# https://adventofcode.com/2019/day/01
+# adventOfCode 2015 day 01
+# https://adventofcode.com/2015/day/01
 
 
-input_filename='input.txt'
+input_filename='input_sample8.txt'
 print(f'\nUsing input file: {input_filename}')
 with open(input_filename) as f:
     in_string = f.readline().rstrip()
