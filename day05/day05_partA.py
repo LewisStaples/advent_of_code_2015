@@ -1,5 +1,5 @@
-# adventOfCode 2015 day ??
-# https://adventofcode.com/2015/day/??
+# adventOfCode 2015 day 05
+# https://adventofcode.com/2015/day/05
 
 
 def failed_three_vowels_test(in_string):
