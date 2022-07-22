@@ -7,14 +7,14 @@ class Lights:
         self.light_grid = [[False for y in range(1000)] for x in range(1000)]
 
     def get_turn_on_value(self, i, j):
-        return True
+        return self.light_grid[i][j] + 1
 
     def get_turn_off_value(self, i, j):
-        return False
+        return max(0, self.light_grid[i][j] - 1)
 
     # Return toggled boolean state of the light
     def get_toggle_value(self, i, j):
-        return self.light_grid[i][j] != True
+        return self.light_grid[i][j] + 2
 
     def update_light(self, operation, i, j):
         self.light_grid[i][j] = getattr(self, operation)(i,j)
@@ -24,6 +24,7 @@ class Lights:
             for j in range(parms[1][1], parms[2][1]+1):
                 self.update_light(parms[0], i, j)
 
+    # This is used in part A only
     def count_lights_on(self):
         ret_val = 0
         for i in range(len(self.light_grid)):
@@ -32,6 +33,12 @@ class Lights:
                     ret_val += 1
         return ret_val
 
+    def get_total_brightness(self):
+        ret_val = 0
+        for i in range(len(self.light_grid)):
+            for j in range(len(self.light_grid[0])):
+                ret_val += self.light_grid[i][j]
+        return ret_val
 
 lights = Lights()
 
@@ -56,7 +63,5 @@ with open(input_filename) as f:
         in_string = in_string.rstrip()
         lights.update_grid(parse(in_string))
 
-print(f'There are {lights.count_lights_on()} light(s) on.')
-print()
-
+print(f'The total brightness is {lights.get_total_brightness()}.\n')
 
