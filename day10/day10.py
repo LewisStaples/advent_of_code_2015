@@ -1,6 +1,8 @@
 # adventOfCode 2015 day ??
 # https://adventofcode.com/2015/day/??
 
+import time
+
 def update_string(curr_str):
     new_str = ''
     next_sequence = {
@@ -33,10 +35,13 @@ with open(input_filename) as f:
         print(f'string: {curr_str} will be processed {rep_num} time(s)')
         rep_num = int(rep_num)
 
+        start_time = time.time()
         for i in range(rep_num):
             curr_str = update_string(curr_str)
+        end_time = time.time()
         if len(curr_str) < 60:
             print(f'     result: {curr_str}')
         else:
             print(f'The resulting string has a length of {len(curr_str)}')
+        print(f'This took {end_time - start_time} seconds to run')
 print()
