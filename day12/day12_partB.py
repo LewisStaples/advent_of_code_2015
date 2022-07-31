@@ -27,7 +27,13 @@ def recursive_count(data_struc):
     ret_val = 0
     # traverse the data_structure
     for ele in data_struc:
-        ret_val += process_element(ele)
+        try:
+            ret_val += process_element(ele)
+        except RedException:
+            # disregard if in array or, if it's an index in a dict/object (because the 
+            # instructions say to ignore any object with any property with value red)
+            pass 
+
     if isinstance(data_struc, dict):
         for ele in data_struc.values():
             try:
@@ -37,11 +43,10 @@ def recursive_count(data_struc):
     return ret_val
 
 # Reading input from the input file
-input_filename='input_sample2.json'
+input_filename='input.json'
 print(f'\nUsing input file: {input_filename}\n')
 with open(input_filename) as f:
     json_in = json.load(f)
-dummy = 123
 
 sum_partB = recursive_count(json_in)
 print(f'The sum of all numbers not in an object where "red" appears (part B) is: {sum_partB}')
