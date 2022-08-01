@@ -30,7 +30,21 @@ happiness_change_ans_A = float('-inf')
 for permutation in permutations(attendees):
     this_happiness_change = calc_happiness_change(permutation, attendee_happiness_impact)
     happiness_change_ans_A = max(happiness_change_ans_A, this_happiness_change)
+print(f'The total change in happiness excluding myself (part A) is {happiness_change_ans_A}\n')
 
-print(f'The total change in happiness (part A) is {happiness_change_ans_A}')
+# Define a string for myself
+self_string = 'myself'
+# Ensure that self_string doesn't clash with any strings in attendees
+while self_string in attendees:
+    self_string += '_'
 
+attendees.add(self_string)
+for attendee in attendees:
+    attendee_happiness_impact[(self_string, attendee)] = 0
+    attendee_happiness_impact[(attendee, self_string)] = 0
 
+happiness_change_ans_B = float('-inf')
+for permutation in permutations(attendees):
+    this_happiness_change = calc_happiness_change(permutation, attendee_happiness_impact)
+    happiness_change_ans_B = max(happiness_change_ans_B, this_happiness_change)
+print(f'The total change in happiness including myself (part B) is {happiness_change_ans_B}\n')
