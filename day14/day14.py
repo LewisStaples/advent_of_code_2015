@@ -43,7 +43,7 @@ class ReindeerProperties:
         return ret_val
 
 # Reading input from the input file
-input_filename='input.txt'
+input_filename='input_sample0.txt'
 reindeerProperties = ReindeerProperties()
 
 print(f'\nUsing input file: {input_filename}\n')
@@ -53,5 +53,5 @@ with open(input_filename) as f:
         in_string = in_string.rstrip()
         reindeerProperties.add(in_string)
 
-answer = reindeerProperties.get_max_distance(2503)
+answer = reindeerProperties.get_max_distance(1000)
 print(f'The answer to part A is {answer}')
