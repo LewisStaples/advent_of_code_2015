@@ -1,2 +1,2 @@
 Rudolph can fly 10 km/s for 4 seconds, but then must rest for 2 seconds.
-Sweetiepie can fly 15 km/s for 3 seconds, but then must rest for 2 seconds.
+Sweetiepie can fly 15 km/s for 5 seconds, but then must rest for 3 seconds.

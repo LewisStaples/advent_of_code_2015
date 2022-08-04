@@ -1,6 +1,8 @@
 # adventOfCode 2015 day 14
 # https://adventofcode.com/2015/day/14
 
+testing = False
+
 class ReindeerProperties:
     def __init__(self):
         self._reindeer = dict()
@@ -20,16 +22,15 @@ class ReindeerProperties:
     # This gets the current reindeer speed,
     # which is either 0 (if resting), or the flight_speed (if not resting)
     def get_reindeer_speed(self, reindeer_name, time):
-        # If at rest, return 0. Else return flight_speed
         remainder = (time) % (self._reindeer[reindeer_name]['flight_duration'] + self._reindeer[reindeer_name]['rest_duration'])
-        if remainder > self._reindeer[reindeer_name]['flight_duration']:
+        if remainder > self._reindeer[reindeer_name]['flight_duration'] - 1:
             return 0
         return self._reindeer[reindeer_name]['flight_speed']
 
-
     def winning_reindeers_points(self, duration):
-        for timestamp in range(1, duration+1):
-            print(timestamp, end=': ')
+        for timestamp in range(0, duration):
+            if testing:
+                print(f'{timestamp}', end=': ')
             longest_travelled = {
                 'distance': float('-inf'),
                 'reindeer': []
@@ -48,18 +49,16 @@ class ReindeerProperties:
 
             # for the leading reindeer, add a point
             for this_reindeer in longest_travelled['reindeer']:
-                # print(this_reindeer)
                 self._reindeer[this_reindeer]['points_accumulated'] += 1
             
             # Printing only
-            for this_reindeer in self._reindeer:
-                dummy = 123
-                # print(f'{this_reindeer}: Dist: {self._reindeer[this_reindeer]['distance_travelled']}', end=', ')
-                print(f'{this_reindeer}: Dist=', end='')
-                print(self._reindeer[this_reindeer]['distance_travelled'], end=', ')
-                print('Points=', end='')
-                print(self._reindeer[this_reindeer]['points_accumulated'], end=', ')
-            print()
+            if testing:
+                for this_reindeer in self._reindeer:
+                    print(f'{this_reindeer}: Dist=', end='')
+                    print(self._reindeer[this_reindeer]['distance_travelled'], end=', ')
+                    print('Points=', end='')
+                    print(self._reindeer[this_reindeer]['points_accumulated'], end=', ')
+                print()
         # Return that point amount
         largest_point_amount = float('-inf')
         for this_reindeer in self._reindeer:
@@ -77,7 +76,10 @@ with open(input_filename) as f:
     for in_string in f:
         in_string = in_string.rstrip()
         reindeerProperties.add(in_string)
-
-answer = reindeerProperties.winning_reindeers_points(150)
+        if testing:
+            print(in_string)
+if testing:
+    print()
+answer = reindeerProperties.winning_reindeers_points(1000)
 print(f'The answer to part B is {answer}')
 
