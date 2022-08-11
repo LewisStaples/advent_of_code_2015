@@ -1,8 +1,7 @@
 # adventOfCode 2015 day 18
 # https://adventofcode.com/2015/day/18
 
-from operator import ne
-
+debug = False
 
 class Light_arrays:
     def __init__(self, input_filename):
@@ -27,13 +26,17 @@ class Light_arrays:
         # Count the number of neighbor lights that are on
         neighbor_lights_on_count = 0
         for delta in [(-1,-1),(-1,0),(-1,1),(0,-1,),(0,1),(1,-1),(1,0),(1,1)]:
-            try:
-                if self._light_arrays[prior_index][i + delta[0]][j+delta[1]] == '#':
-                    neighbor_lights_on_count += 1
-            except IndexError:
-                # This neighbor is over an edge, so proceed to the next one
+            i_neighbor = i + delta[0]
+            j_neighbor = j + delta[1]
+            if i_neighbor not in range(self._array_height) or j_neighbor not in range(self._array_width):
+                # This neighbor is over an edge, so proceed to the next neighbor
                 continue
+            if self._light_arrays[prior_index][i_neighbor][j_neighbor] == '#':
+                neighbor_lights_on_count += 1
+
         # A light which is on stays on when 2 or 3 neighbors are on, and turns off otherwise.
+        if debug:
+            print(f'i,j ({i},{j}) has {neighbor_lights_on_count} lit neighbor(s)')
         if self._light_arrays[prior_index][i][j] == '#':
             if neighbor_lights_on_count in [2,3]:
                 return '#'
@@ -47,38 +50,28 @@ class Light_arrays:
     def update_array(self, step_number):
         prior_index = (step_number + 1) % 2
         current_index = step_number % 2
-        print(f'step_no.: {step_number}, prior_i: {prior_index}, current_i: {current_index}')
         for i in range(self._array_height):
             for j in range(self._array_width):
                 self._light_arrays[current_index][i][j] = self.get_new_char(prior_index, i, j)
         
-        dummy = 123
+    def count_lights_on(self, step_number):
+        ret_val = 0
+        current_index = step_number % 2
+        for i in range(self._array_height):
+            for j in range(self._array_width):
+                if self._light_arrays[current_index][i][j] == '#':
+                    ret_val += 1
 
-# # Reading input from the input file
-# input_filename='input_sample0.txt'
-# print(f'\nUsing input file: {input_filename}\n')
-# with open(input_filename) as f:
-#     # Pull in each line from the input file
-#     for line_number, in_string in enumerate(f):
-#         in_string = in_string.rstrip()
-#         # Initialize with initial state
-#         light_arrays[0].append([ch for ch in in_string]) 
-#         # Initialize with dummy characters (so it can be easily modifiable later)
-#         light_arrays[1].append([None for ch in in_string])
-
+        return ret_val
 
 MAX_STEP = 4
 light_arrays = Light_arrays('input_sample0.txt')
 for step_number in range(1, MAX_STEP + 1):
     light_arrays.update_array(step_number)
 
-dummy = 123
+print(f'Part A answer ... At the end {light_arrays.count_lights_on(step_number)} light(s) are on.')
+print()
 
 
-    # prior_index = (step_number + 1) % 2
-    # current_index = step_number % 2
-    # print(f'step_no.: {step_number}, prior_i: {prior_index}, current_i: {current_index}')
-    # for i in range(array_height):
-    #     for j in range(array_width):
-    #         pass
+
 
