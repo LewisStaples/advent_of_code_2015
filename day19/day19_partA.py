@@ -13,22 +13,28 @@ class All_replacements:
         else:
             self._replacement_rules[input] = [output]
 
+    def get_substring(self, full_string, index_list):
+        return full_string[index_list[0] : index_list[-1] + 1]
+
     def find_all(self, in_string):
         substring_indices = []
         for i in range(len(in_string)):
+            # Append an/other index to substring_indices
             substring_indices.append(i)
-            substring = in_string[substring_indices[0]:substring_indices[-1]+1]
-            if substring not in self._replacement_rules:
+            # See if the whole substring (using all indices) has an associated rule
+            if self.get_substring(in_string, substring_indices) not in self._replacement_rules:
+                # Remove one character, at a time, from the start of it ... see if that substring has an associated rule
                 sub_substring_indices = substring_indices
                 while len(sub_substring_indices) > 1:
                     sub_substring_indices.pop(0)
-                    sub_substring = in_string[sub_substring_indices[0]:sub_substring_indices[-1]+1]
-                    if sub_substring in self._replacement_rules:
-                        substring = sub_substring
+                    if self.get_substring(in_string, sub_substring_indices) in self._replacement_rules:
+                        substring_indices = sub_substring_indices
                         break
-                if substring not in self._replacement_rules:
+                else:
+                    # break was never triggered from within while (hence, no match has been found)
                     continue
-            for replacement_string in self._replacement_rules[substring]:
+            # for replacement_string in self._replacement_rules[substring]:
+            for replacement_string in self._replacement_rules[self.get_substring(in_string, substring_indices)]:
                 self._all_possible_replacements.add(in_string[:substring_indices[0]] + replacement_string + in_string[substring_indices[-1]+1:])
                 dummy = 123
             substring_indices = []
