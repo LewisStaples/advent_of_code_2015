@@ -1,3 +1,8 @@
+# adventOfCode 2015 day 19
+# https://adventofcode.com/2015/day/19
+
+import itertools
+
 class Replacements:
     def __init__(self):
         self._replacement_rules = dict()
@@ -10,35 +15,23 @@ class Replacements:
         return full_string[index_list[0] : index_list[-1] + 1]
 
     def find_all(self, in_string):
-        substring_indices = []
         ret_val = set()
-        for i in range(len(in_string)):
-            # Append an/other index to substring_indices
-            substring_indices.append(i)
-            # See if the whole substring (using all indices) has an associated rule
-            if self.get_substring(in_string, substring_indices) not in self._replacement_rules:
-                # Remove one character, at a time, from the start of it ... see if that substring has an associated rule
-                sub_substring_indices = substring_indices
-                while len(sub_substring_indices) > 1:
-                    sub_substring_indices.pop(0)
-                    if self.get_substring(in_string, sub_substring_indices) in self._replacement_rules:
-                        substring_indices = sub_substring_indices
-                        break
-                else:
-                    # break was never triggered from within while (hence, no match has been found)
-                    continue
-            # for replacement_string in self._replacement_rules[substring]:
-            for replacement_string in self._replacement_rules[self.get_substring(in_string, substring_indices)]:
-                ret_val.add(in_string[:substring_indices[0]] + replacement_string + in_string[substring_indices[-1]+1:])
-            substring_indices = []
-
-        # self._known_replacements[in_string] = ret_val
+        for substring_indices in itertools.combinations_with_replacement(range(len(in_string)), 2):
+            the_substring = self.get_substring(in_string, substring_indices)
+            # if substring has an associated rule
+            if the_substring in self._replacement_rules:
+                for replacement_string in self._replacement_rules[the_substring]:
+                    ret_val.add(
+                        in_string[:substring_indices[0]] +
+                        replacement_string + 
+                        in_string[substring_indices[-1] + 1:]
+                    )
         return ret_val
 
 the_replacements = Replacements()
 
 # Reading input from the input file
-input_filename='input_sample2.txt'
+input_filename='input.txt'
 print(f'\nUsing input file: {input_filename}\n')
 with open(input_filename) as f:
     # Pull in each line from the input file
@@ -48,8 +41,6 @@ with open(input_filename) as f:
             continue
         elif ' => ' in in_string:
             the_replacements.add(in_string)
-            print(in_string)
-
         else:
             medicine_molecule = in_string
 
@@ -61,8 +52,10 @@ while 'e' not in molecule_in_x_steps:
         if molecule not in molecule_in_x_steps:
             molecule_in_x_steps[molecule] = step_number
             newest_molecules[(step_number + 1) % 2].update(the_replacements.find_all(molecule))
-        dummy = 123
     newest_molecules[step_number % 2] = set()
     step_number += 1
 
-    dummy = 123
+print('The number of steps to create the medicine_molecule (answer to part B) is: ', end ='')
+print(molecule_in_x_steps['e'])
+print()
+
