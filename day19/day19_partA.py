@@ -36,14 +36,12 @@ class All_replacements:
             # for replacement_string in self._replacement_rules[substring]:
             for replacement_string in self._replacement_rules[self.get_substring(in_string, substring_indices)]:
                 self._all_possible_replacements.add(in_string[:substring_indices[0]] + replacement_string + in_string[substring_indices[-1]+1:])
-                dummy = 123
             substring_indices = []
 
 all_replacements = All_replacements()
-medicine_molecule = None
 
 # Reading input from the input file
-input_filename='input.txt'
+input_filename='input_sample1.txt'
 print(f'\nUsing input file: {input_filename}\n')
 with open(input_filename) as f:
     # Pull in each line from the input file
