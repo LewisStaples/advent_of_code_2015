@@ -1,0 +1,22 @@
+adventOfCode 2015 day 20, part B
+https://adventofcode.com/2015/day/20
+
+Below are my notes for thinking through part B:
+
+Elf 1 goes to 1,2,3,...,50
+Elf 2 goes to 2,4,6,...,100
+Elf 3 goes to 3,6,9,...,150
+
+THESE ARE THE SAME AS part A:
+House 1 is visited by elf 1
+House 2 is visited by elves 1,2
+House 3 is visited by elves 1,3
+All houses 1 - 50 have the same elf visits as A.
+
+Differences
+House 51 and all higher numbers aren't visited by elf 1
+House 102 (and all higher numbers with % 2 == 0) aren't visited by elf 2
+House 153 (and all higher numbers with % 3 == 0) aren't visited by elf 3
+
+The changeover occurs at house_number / 50
+
