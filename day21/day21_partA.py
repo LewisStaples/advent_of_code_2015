@@ -13,8 +13,10 @@
 # Then sort the values in brute_forced_options ... the smallest cost is the answer to part A.
 
 
-from dataclasses import dataclass
-from itertools import product, combinations
+from dataclasses import dataclass  
+from itertools import product
+import itertools #, combinations
+# import itertools
 
 class LogicError(Exception):
     pass
@@ -87,6 +89,15 @@ class Game:
 
 # Use brute force, considering all possible purchases, to determine all possible total combinations of price, damage, and armor.  If there are any repeats of damage and armor, then only consider the lowest priced version for that combination
 
+
+
+@dataclass
+class PurchaseCharacteristics:
+    cost: int
+    damage: int
+    armor: int
+
+
 price_list = dict()
 # Reading input from the input file
 input_filename='shop_price_list.txt'
@@ -127,8 +138,27 @@ purchase_amount_options_iter = product(
 print()
 for option in purchase_amount_options_iter:
     print(option)
+    options = []
     for i, item_type_quantity in enumerate(option):
-        print(f'{item_type_quantity} of {purchase_type[i]}(s)')
+        print(f'{item_type_quantity} of {purchase_type[i]}')
+        if len(options) == 0:
+            for item in itertools.combinations(price_list[purchase_type[i]], item_type_quantity):
+                options.append(list(item))
+        # else:
+        #   go through each item in options and copy it so there are enough to cover all possibilities for the next item type, and append that to the list
+
+    print(options)
+    print('--------------')
+    # for i, item_type_quantity in enumerate(option):
+    #     i_c = itertools.combinations(price_list[purchase_type[i]], item_type_quantity)
+    #     for thingy in i_c:
+    #         print(thingy)
+            # for sub_thingy in thingy:
+            #     sub_thingy = PurchaseCharacteristics(*sub_thingy)
+            #     print(sub_thingy) #, end=', ')
+            # print('------------')
+
+    print("==============")
 print()
 
 
