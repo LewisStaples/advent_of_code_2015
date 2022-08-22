@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from itertools import product
 import itertools #, combinations
 # import itertools
+import copy
 
 class LogicError(Exception):
     pass
@@ -137,17 +138,41 @@ purchase_amount_options_iter = product(
 # purchase_amount_options_iter = product(x for x in purchase_type)
 print()
 for option in purchase_amount_options_iter:
-    print(option)
+    print(f'Option: {option}')
     options = []
     for i, item_type_quantity in enumerate(option):
         print(f'{item_type_quantity} of {purchase_type[i]}')
-        if len(options) == 0:
-            for item in itertools.combinations(price_list[purchase_type[i]], item_type_quantity):
-                options.append(list(item))
-        # else:
+        if i == 0:
+            for items in itertools.combinations(price_list[purchase_type[i]], item_type_quantity):
+                for item in items:
+                    options.append([tuple(item)])
+                    # options.append(list(item))
+            # print(f'Round one: {options}')
+        else:
         #   go through each item in options and copy it so there are enough to cover all possibilities for the next item type, and append that to the list
+            new_options = []
+            for option_i in range(len(options)):
+                # new_options.append(options[option_i])
+                for items in itertools.combinations(price_list[purchase_type[i]], item_type_quantity):
+                    new_options.append(copy.deepcopy(options[option_i]))
+                    for item in items:
+                        # new_options.append(copy.deepcopy(options[option_i]))
+                        new_options[-1].append(copy.deepcopy(item))
+            if len(new_options) > 0:
+                options = new_options
 
-    print(options)
+            # print(f'Next round ... {options}')
+
+            dummy = 123
+
+    # print(f'Time to calculate with {options}')
+    print('Time to calculate')
+    for option in options:
+        print(f'Option {option}')
+
+        dummy = 123
+    dummy = 123
+
     print('--------------')
     # for i, item_type_quantity in enumerate(option):
     #     i_c = itertools.combinations(price_list[purchase_type[i]], item_type_quantity)
