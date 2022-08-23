@@ -18,6 +18,7 @@ from itertools import product
 import itertools #, combinations
 # import itertools
 import copy
+import numpy as np
 
 class LogicError(Exception):
     pass
@@ -72,21 +73,25 @@ class Game:
             raise LogicError('You can only play with exactly two players')
         # while self._round_number < 8:
         while True:
-            if show_all_rounds:
-                # Displaying status before the round is played
-                self.display_status()
-            if self.play_round() is not None:
-                # Stop playing
+            # if show_all_rounds:
+            #     # Displaying status before the round is played
+            #     self.display_status()
+            # if self.play_round() is not None:
+            #     # Stop playing
+            #     break
+            the_winner = self.play_round()
+            if the_winner is not None:
                 break
         # Displaying final status
-        self.display_status()
-        print()
+        # self.display_status()
+        # print()
+        return the_winner
 
-# # Code created to test the above code ...    
-# the_game = Game()
-# the_game.add_player( Player(8, 5, 5, 'The player') )
-# the_game.add_player( Player(12, 7, 2, 'The boss') )
-# the_game.run_game()
+# Code created to test the above code ...    
+the_game = Game()
+the_game.add_player( Player(8, 5, 5, 'The player') )
+the_game.add_player( Player(12, 7, 2, 'The boss') )
+print(f'The winner is ... {the_game.run_game()}')
 
 # Use brute force, considering all possible purchases, to determine all possible total combinations of price, damage, and armor.  If there are any repeats of damage and armor, then only consider the lowest priced version for that combination
 
@@ -98,6 +103,9 @@ class PurchaseCharacteristics:
     damage: int
     armor: int
 
+# key = (damage, armor) combination
+# value = lowest seen price
+brute_forced_options = dict()
 
 price_list = dict()
 # Reading input from the input file
@@ -135,64 +143,70 @@ purchase_amount_options_iter = product(
     purchase_amount_options_dict['rings']
 )
 
-# purchase_amount_options_iter = product(x for x in purchase_type)
 print()
+
+# Reading input from the input file
+input_filename='input.txt'
+print(f'\nUsing input file: {input_filename}\n')
+with open(input_filename) as f:
+    # Pull in each line from the input file
+    for in_string in f:
+        in_string = in_string.rstrip()
+        var_name, value_str = in_string.split(': ')
+        value_int = int(value_str)
+        if var_name == 'Hit Points':
+            boss_hit_points = value_int
+        elif var_name == 'Damage':
+            boss_damage = value_int
+        elif var_name == 'Armor':
+            boss_armor = value_int
+
+dummy = 123
+# boss_hit_points = 103
+# boss_damage = 9
+# boss_armor = 2
+
 for option in purchase_amount_options_iter:
-    print(f'Option: {option}')
+    # print(f'Option: {option}')
     options = []
     for i, item_type_quantity in enumerate(option):
-        print(f'{item_type_quantity} of {purchase_type[i]}')
+        # print(f'{item_type_quantity} of {purchase_type[i]}')
         if i == 0:
             for items in itertools.combinations(price_list[purchase_type[i]], item_type_quantity):
                 for item in items:
-                    options.append([tuple(item)])
-                    # options.append(list(item))
-            # print(f'Round one: {options}')
+                    options.append([np.asarray(item)])
         else:
         #   go through each item in options and copy it so there are enough to cover all possibilities for the next item type, and append that to the list
             new_options = []
             for option_i in range(len(options)):
-                # new_options.append(options[option_i])
                 for items in itertools.combinations(price_list[purchase_type[i]], item_type_quantity):
                     new_options.append(copy.deepcopy(options[option_i]))
                     for item in items:
-                        # new_options.append(copy.deepcopy(options[option_i]))
-                        new_options[-1].append(copy.deepcopy(item))
+                        new_options[-1].append(np.asarray(item))
             if len(new_options) > 0:
                 options = new_options
 
-            # print(f'Next round ... {options}')
-
-            dummy = 123
-
-    # print(f'Time to calculate with {options}')
-    print('Time to calculate')
+    # print()
     for option in options:
-        print(f'Option {option}')
+        # print(f'Option {option}')
+        option_combined = np.array([0,0,0])
+        for nparray in option:
+            option_combined += nparray
+        
+        # print(f'Combined: {option_combined}')
 
-        dummy = 123
-    dummy = 123
+        the_game = Game()
+        the_game.add_player( Player(100, option_combined[1], option_combined[2], 'The player') )
+        the_game.add_player( Player(boss_hit_points, boss_damage, boss_armor, 'The boss') )
+        # print(f'The winner is ... {the_game.run_game()}')
+        if the_game.run_game() == 'The player':
+            dummy = 123
+            # brute_forced_options[(option_combined[1], option_combined[2])] = option_combined[0]
+            player_variables = (option_combined[1], option_combined[2])
+            if player_variables in brute_forced_options:
+                brute_forced_options[player_variables] = min(brute_forced_options[player_variables] , option_combined[0])
+            else:
+                brute_forced_options[player_variables] = option_combined[0]
 
-    print('--------------')
-    # for i, item_type_quantity in enumerate(option):
-    #     i_c = itertools.combinations(price_list[purchase_type[i]], item_type_quantity)
-    #     for thingy in i_c:
-    #         print(thingy)
-            # for sub_thingy in thingy:
-            #     sub_thingy = PurchaseCharacteristics(*sub_thingy)
-            #     print(sub_thingy) #, end=', ')
-            # print('------------')
-
-    print("==============")
-print()
-
-
-# key = (damage, armor) combination
-# value = lowest seen price
-brute_forced_options = dict()
-
-
-
-
-
+print(f'The answer is {min(brute_forced_options.values())}')
 
