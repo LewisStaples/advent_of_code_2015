@@ -2,7 +2,7 @@
 # https://adventofcode.com/2015/day/21
 
 
-# Plan for how to solve part A:
+# Plan for how to solve part B:
 # Brute force: consider all possible combinations of purchases of weapons, armor, rings
 #   calculate the cost, damage, and armor for each combination
 #   keep the lowest price option in dict brute_forced_options
@@ -10,7 +10,7 @@
 # Run every combination of purchases through Game.run_game()
 #   eliminate all items in dict brute_forced_options where player loses
 #   
-# Then sort the values in brute_forced_options ... the smallest cost is the answer to part A.
+# Then sort the values in brute_forced_options ... the largest cost is the answer to part B.
 
 
 from dataclasses import dataclass  
@@ -194,14 +194,14 @@ for option in purchase_amount_options_iter:
         the_game.add_player( Player(100, option_combined[1], option_combined[2], 'The player') )
         the_game.add_player( Player(boss_hit_points, boss_damage, boss_armor, 'The boss') )
         # print(f'The winner is ... {the_game.run_game()}')
-        if the_game.run_game() == 'The player':
+        if the_game.run_game() == 'The boss':
             dummy = 123
             # brute_forced_options[(option_combined[1], option_combined[2])] = option_combined[0]
             player_variables = (option_combined[1], option_combined[2])
             if player_variables in brute_forced_options:
-                brute_forced_options[player_variables] = min(brute_forced_options[player_variables] , option_combined[0])
+                brute_forced_options[player_variables] = max(brute_forced_options[player_variables] , option_combined[0])
             else:
                 brute_forced_options[player_variables] = option_combined[0]
 
-print(f'The answer is {min(brute_forced_options.values())}')
+print(f'The answer is {max(brute_forced_options.values())}')
 
