@@ -3,6 +3,8 @@
 
 from dataclasses import dataclass  
 from enum import Enum
+from abc import ABC, abstractmethod
+from copy import deepcopy
 
 class LogicError(Exception):
     pass
@@ -15,32 +17,66 @@ class SpellID(Enum):
     RECHARGE = 4
 
 class Player:
-    pass
+    def __init__(self, hit_points, damage):
+        self.hit_points = hit_points
+        self.damage = damage
 
-    # _hit_points: int
-    # _damage: int
+    @abstractmethod
+    def play_round(self):
+        pass
 
 class Wizard(Player):
     def __init__(self, hit_points, mana):
         # current state
-        self._hit_points = hit_points
-        self._damage = 0
-        self._armor = 0
-        self._mana = mana
+        self.hit_points = hit_points
+        self.damage = 0
+        self.armor = 0
+        self.mana = mana
 
         # timers
-        self._shield_remaining = 0
-        self._recharge_remaining = 0
+        self.drain_remaining = 0
+        self.shield_remaining = 0
+        self.poison_remaining = 0
+        self.recharge_remaining = 0
 
-# @dataclass
+    def cast_magic_missile(self):
+        pass
+    
+    def cast_drain(self):
+        pass
+
+    def cast_shield(self):
+        pass
+
+    def cast_poison(self):
+        pass
+
+    def cast_recharge(self):
+        pass
+
+    def play_round(self):
+        pass
+
+    def get_status(self):
+        return f'{self.hit_points} hit points, {self.armor} armor, {self.mana} mana'
+
 class Boss(Player):
     def __init__(self, hit_points, damage):
-        self._hit_points = hit_points
-        self._damage = damage
+        super().__init__(hit_points, damage)
+
+    def play_round(self):
+        return 'dummy value'
+
+
+    def get_status(self):
+        return f'{self.hit_points} hit points'
 
 class Game:
-    def __init__(self, wizard_hp, wizard_mana, boss_input_filename, games_list, rounds_to_show = []):
-        self._wizard = Wizard(wizard_hp, wizard_mana)
+    # static variable
+    min_mana_win: int
+
+    def __init__(self, wizard_hp, wizard_mana, boss_input_filename, round_number, rounds_to_show = []):
+        self.wizard = Wizard(wizard_hp, wizard_mana)
         print(f'\nUsing boss paramater input file: {boss_input_filename}\n')
         with open(boss_input_filename) as f:
             # Pull in each line from the input file
@@ -51,25 +87,33 @@ class Game:
                     boss_hp = int(value)
                 elif varname == 'Damage':
                     boss_damage = int(value)
-                # print(in_string)
-        self._boss = Boss(boss_hp, boss_damage)
-        self._round_number = 0
-        self._games_list = games_list
-        self._rounds_to_show = rounds_to_show
+        self.boss = Boss(boss_hp, boss_damage)
+        self.round_number = round_number
+        
+        # The purpose of this variable is to display to user information about the sample spells
+        # (All other permutations of spells won't be shown)
+        self.rounds_to_show = rounds_to_show
 
-    def show_status(self):
-        if len(self._rounds_to_show) == 0:
-            return # not displaying this one
-        print(f'-- turn --')
+    def print_status(self):
+        print(f'-Player has ', end='')
+        print(self.wizard.get_status())
+        print(f'-Boss has ', end='')
+        print(self.boss.get_status())
 
-    def run_game(self):
-        while True:
-            # self.wizard_round()
-            # self.boss_round()
-            break # TO BE REPLACED LATER (for now it's here to prevent infinite loops)
+    def next_round(self):
+        pass
 
-# First sample given:
-games_s0 = []
-games_s0.append(Game(10, 250, 'input_sample0.txt', games_s0, [SpellID.POISON, SpellID.MAGIC_MISSILE]))
-games_s0[0].run_game()
+
+def test_sample_zero():
+    print('Testing sample zero ...')
+    game_list = [Game(10, 250, 'input_sample0.txt', 0, [SpellID.POISON, SpellID.MAGIC_MISSILE])]
+    Game.min_mana_win = float('inf')
+    while len(game_list) > 0:
+        this_game = game_list.pop()
+        this_game.next_round()
+
+    print(f'The minimum mana that can be spent on a win is {Game.min_mana_win}')
+
+
+
 
