@@ -40,6 +40,7 @@ class Wizard(Player):
         self.damage = 0
         self.armor = 0
         self.mana = mana
+        self.mana_spent = 0
 
         # timers
         self.magic_missile_remaining = 0
@@ -111,32 +112,62 @@ class Game:
         self.rounds_to_show = rounds_to_show
 
     def print_status(self):
-        print(f'-Player has ', end='')
-        print(self.wizard.get_status())
-        print(f'-Boss has ', end='')
-        print(self.boss.get_status())
+        ret_val = '\n'
+        if self.round_number % 2 == 0:
+            ret_val += f'-- Player turn --\n'
+        else:
+            ret_val += f'-- Boss turn --\n'
+        ret_val += f'-Player has ' + self.wizard.get_status() + '\n'
+        ret_val += f'-Boss has ' + self.boss.get_status() + '\n'
 
-    def round_start(self):
+        return ret_val
+
+        # print(f'-Player has ', end='')
+        # print(self.wizard.get_status())
+        # print(f'-Boss has ', end='')
+        # print(self.boss.get_status())
+
+    def round_start(self):  
+        # if len(self.rounds_to_show) > 0:
+        #     # if self.rounds_to_show[self.round_number]
+        #     to_print = True
+        # else:
+        #     to_print = False
+        # if to_print:
+        ret_val = self.print_status()
         # Process Wizard's timers
         if self.wizard.magic_missile_remaining > 0:
             self.wizard.magic_missile_remaining -= 1
             if self.wizard.magic_missile_remaining == 0:
                 self.wizard.damage -= 4
+            # if to_print:
+            # print(f"Magic Missile was used.")
+            ret_val += "Magic Missile was used.\n"
         if self.wizard.drain_remaining > 0:
             self.wizard.drain_remaining -= 1
             if self.wizard.drain_remaining == 0:
                 self.wizard.damage -= 2
+            # if to_print:
+            #     print(f"Drain was used.")
+            ret_val += "Drain was used.\n"
         if self.wizard.shield_remaining > 0:
             self.wizard.shield_remaining -= 1
             if self.wizard.shield_remaining == 0:
                 self.wizard.armor -= 7
+            # if to_print:
+            #     print(f"Shield's timer is now {self.wizard.shield_remaining}.")
+            ret_val += f"Shield's timer is now {self.wizard.shield_remaining}.\n"
         if self.wizard.poison_remaining > 0:
             self.wizard.poison_remaining -= 1
             self.boss.hit_points -= 3
-            print(f'Poison deals 3 damage; its timer is now {self.wizard.poison_remaining}.')
+            # if to_print:
+            #     print(f'Poison deals 3 damage; its timer is now {self.wizard.poison_remaining}.')
+            ret_val += f'Poison deals 3 damage; its timer is now {self.wizard.poison_remaining}.'
         if self.wizard.recharge_remaining> 0:
             self.wizard.mana += 101
-            print(f'Recharge provides 101 mana; its timer is now {self.wizard.recharge_remaining}.')
+            # if to_print:
+                # print(f'Recharge provides 101 mana; its timer is now {self.wizard.recharge_remaining}.')
+            ret_val += f'Recharge provides 101 mana; its timer is now {self.wizard.recharge_remaining}.'
             self.wizard.recharge_remaining -= 1
         
 
@@ -144,11 +175,16 @@ class Game:
         # Note for the wizard, this implies each of the scenarios
         if self.round_number % 2 == 0:
             self.boss.hit_points -= max(1, self.wizard.damage)
+            if self.boss.hit_points <= 0:
+                Game.min_mana_win = min(Game.min_mana_win, self.wizard.mana_spent)
+                return 'ROUND_ENDED'
+
         else:
             self.wizard.hit_points -= max(1, self.boss.damage - self.wizard.armor)
+            if self.wizard.hit_points <= 0:
+                return 'ROUND_ENDED'
 
-
-
+        return ret_val
 # End of class Game
 
 
@@ -156,7 +192,9 @@ def play_game(game_list):
     Game.min_mana_win = float('inf')
     while len(game_list) > 0:
         this_game = game_list.pop()
-        this_game.round_start()
+        ret_val = this_game.round_start()
+        if ret_val == 'ROUND_ENDED':
+            continue
         if this_game.round_number % 2 == 0:
             for i in range(5):
                 spell_mana_cost = Wizard.spell_list[i]['mana_cost']
@@ -169,7 +207,15 @@ def play_game(game_list):
                 else:
                     new_game = this_game
                 # cast a spell
-                getattr(new_game.wizard, 'cast_' + Wizard.spell_list[i]['spell_name'])
+                new_game.wizard.mana -= spell_mana_cost
+                new_game.wizard.mana_spent += spell_mana_cost
+                if new_game.rounds_to_show != []:
+                    if Wizard.spell_list[i]['spell_name'] != new_game.rounds_to_show.pop(0):
+                        new_game.rounds_to_show = []
+                    else:
+                        print(ret_val)
+                        print('Player casts ' + Wizard.spell_list[i]['spell_name'])
+                getattr(new_game.wizard, 'cast_' + Wizard.spell_list[i]['spell_name'])()
                 if new_game.wizard.hit_points < 0:
                     # The wizard ran out of h.p. ... doesn't count to objective
                     continue
@@ -181,12 +227,14 @@ def play_game(game_list):
                 pass
            
             dummy = 123
-        else:
-            pass
-        # Update round number
+            
+        # Commands for boss' turn
+        if new_game.rounds_to_show != []:
+            print(ret_val)
         this_game.round_number += 1
+        game_list.insert(0, this_game)
 
-    print(f'The minimum mana that can be spent on a win is {Game.min_mana_win}')
+    print(f'\nThe minimum mana that can be spent on a win is {Game.min_mana_win}\n')
 
 
 def test_sample_zero():
