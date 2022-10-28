@@ -4,7 +4,7 @@
 
 import copy
 
-class Wizard(): # Player):
+class Wizard():
     # static variable
     spell_list = [
         {'spell_name': 'magic_missile', 'mana_cost': 53},
@@ -17,42 +17,42 @@ class Wizard(): # Player):
     def __init__(self, hit_points, mana):
         # current state
         self.hit_points = hit_points
-        self.damage = 0
         self.armor = 0
         self.mana = mana
         self.mana_spent = 0
 
         # timers
-        self.magic_missile_remaining = 0
-        self.drain_remaining = 0
         self.shield_remaining = 0
         self.poison_remaining = 0
         self.recharge_remaining = 0
 
     def cast_magic_missile(self):
-        self.magic_missile_remaining = 1
-        self.damage += 4
+        return {'hit_points':-4, 'message':'Because player has cast Magic Missile, damage of 4 is dealt.'}
+
     
     def cast_drain(self):
-        self.damage += 2
         self.hit_points += 2
+        return {'hit_points':-2, 'message':'Because player has cast Drain, damage of 2 is dealt.'}
 
     def cast_shield(self):
-        self.shield_remaining = 7
+        self.shield_remaining = 6
         self.armor += 7
+        return {}
 
     def cast_poison(self):
-        self.poison_remaining = 7
+        self.poison_remaining = 6
+        return {}
 
     def cast_recharge(self):
         self.recharge_remaining = 5
+        return {}
 
 
 
     def get_status(self):
         return f'{self.hit_points} hit points, {self.armor} armor, {self.mana} mana'
 
-class Boss(): # Player):
+class Boss():
     def __init__(self, hit_points, damage):
         self.hit_points = hit_points
         self.damage = damage
@@ -94,48 +94,39 @@ class Game:
         else:
             ret_val += f'-- Boss turn --\n'
         ret_val += f'-Player has ' + self.wizard.get_status() + '\n'
-        ret_val += f'-Boss has ' + self.boss.get_status() + '\n'
+        ret_val += f'-Boss has ' + self.boss.get_status()
         return ret_val
 
 
     def round_start(self):  
         ret_val = self.print_status()
-        # Process Wizard's timers
-        if self.wizard.magic_missile_remaining > 0:
-            self.wizard.magic_missile_remaining -= 1
-            if self.wizard.magic_missile_remaining == 0:
-                self.wizard.damage -= 4
-            ret_val += "Magic Missile deals 4 damage.\n"
-        if self.wizard.drain_remaining > 0:
-            self.wizard.drain_remaining -= 1
-            if self.wizard.drain_remaining == 0:
-                self.wizard.damage -= 2
-            ret_val += "Drain deals out 2 damage and heals wizard's 2 hit points.\n"
         if self.wizard.shield_remaining > 0:
             self.wizard.shield_remaining -= 1
             if self.wizard.shield_remaining == 0:
                 self.wizard.armor -= 7
-            ret_val += f"Shield's timer is now {self.wizard.shield_remaining}.\n"
+            ret_val += f"\nShield's timer is now {self.wizard.shield_remaining}."
         if self.wizard.poison_remaining > 0:
             self.wizard.poison_remaining -= 1
             self.boss.hit_points -= 3
-            ret_val += f'Poison deals 3 damage; its timer is now {self.wizard.poison_remaining}.'
+            ret_val += f'\nPoison deals 3 damage; its timer is now {self.wizard.poison_remaining}.'
         if self.wizard.recharge_remaining> 0:
             self.wizard.mana += 101
-            ret_val += f'Recharge provides 101 mana; its timer is now {self.wizard.recharge_remaining}.'
             self.wizard.recharge_remaining -= 1
-        
+            ret_val += f'\nRecharge provides 101 mana; its timer is now {self.wizard.recharge_remaining}.'
+            
+    
+        if self.boss.hit_points <= 0:
+            Game.min_mana_win = min(Game.min_mana_win, self.wizard.mana_spent)
+            ret_val += f'\nThe boss is dead (down to {self.boss.hit_points} hit points)\nEND'
+            return ret_val
 
-        if self.round_number % 2 == 0:
-            if self.boss.hit_points <= 0:
-                Game.min_mana_win = min(Game.min_mana_win, self.wizard.mana_spent)
-                ret_val += 'END'
-
-        else:
+        if self.round_number % 2 == 1:
             # Boss attacking ... calculated using Day 21's logic
-            self.wizard.hit_points -= max(1, self.boss.damage - self.wizard.armor)
+            damage_inf_by_boss = max(1, self.boss.damage - self.wizard.armor)
+            self.wizard.hit_points -= damage_inf_by_boss
+            ret_val += f'\nBoss attacks for {damage_inf_by_boss} damage'
             if self.wizard.hit_points <= 0:
-                ret_val += 'END'
+                ret_val += '\nEND'
 
         return ret_val
 # End of class Game
@@ -176,7 +167,20 @@ def play_game(game_list):
                             # This is to show the boss found following the last displayed wizard round
                             # (if there is one)
                             new_game.rounds_to_show = ['display_boss_round']
-                getattr(new_game.wizard, 'cast_' + Wizard.spell_list[i]['spell_name'])()
+                # Return object has message or changes to instance variables of boss object
+                ret_obj = getattr(new_game.wizard, 'cast_' + Wizard.spell_list[i]['spell_name'])()
+                for key, val in ret_obj.items():
+                    dummy = 123
+                    if key == 'message':
+                        if new_game.rounds_to_show != []:
+                            print(val)
+                    else:
+                        # Changes to instance variables of boss object
+                        # (Note that any changes to wizard object aren't returned:
+                        # they're made in the cast* method directly)
+                        new_value = getattr(new_game.boss, key) + val
+                        setattr(new_game.boss, key, new_value)
+
                 if new_game.wizard.hit_points < 0:
                     # The wizard ran out of h.p. ... doesn't count to objective
                     continue
@@ -199,10 +203,21 @@ def play_game(game_list):
 
 def test_sample_zero():
     print('Testing sample zero ...')
-    game_list = [Game(10, 250, 'input_sample0.txt', 0, [Wizard.spell_list[3]['spell_name'], Wizard.spell_list[0]['spell_name']])]
+    game_list = [Game(10, 250, 'input_sample0.txt', 0, ['poison', 'magic_missile'])]
     play_game(game_list)
 
-test_sample_zero()
+def test_sample_one():
+    print('Testing sample one ...')
+    game_list = [Game(10, 250, 'input_sample1.txt', 0, ['recharge','shield','drain','poison','magic_missile'])]
+    play_game(game_list)
+
+def test_partA_graded():
+    print('Testing graded problem ... ')
+    game_list = [Game(50, 500, 'input.txt', 0, [])]
+    play_game(game_list)
+
+# test_sample_zero()
+test_sample_one()
 
 
 
