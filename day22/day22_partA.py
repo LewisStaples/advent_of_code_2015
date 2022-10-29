@@ -47,8 +47,6 @@ class Wizard():
         self.recharge_remaining = 5
         return {}
 
-
-
     def get_status(self):
         return f'{self.hit_points} hit points, {self.armor} armor, {self.mana} mana'
 
@@ -104,15 +102,15 @@ class Game:
             self.wizard.shield_remaining -= 1
             if self.wizard.shield_remaining == 0:
                 self.wizard.armor -= 7
-            ret_val += f"\nShield's timer is now {self.wizard.shield_remaining}."
+            ret_val += f"\nSpell shield's timer is now {self.wizard.shield_remaining}."
         if self.wizard.poison_remaining > 0:
             self.wizard.poison_remaining -= 1
             self.boss.hit_points -= 3
-            ret_val += f'\nPoison deals 3 damage; its timer is now {self.wizard.poison_remaining}.'
+            ret_val += f"\nPoison deals 3 damage; Spell poison's timer is now {self.wizard.poison_remaining}."
         if self.wizard.recharge_remaining> 0:
             self.wizard.mana += 101
             self.wizard.recharge_remaining -= 1
-            ret_val += f'\nRecharge provides 101 mana; its timer is now {self.wizard.recharge_remaining}.'
+            ret_val += f"\nRecharge provides 101 mana; Spell recharge's timer is now {self.wizard.recharge_remaining}."
             
     
         if self.boss.hit_points <= 0:
@@ -148,6 +146,10 @@ def play_game(game_list):
                 if spell_mana_cost > this_game.wizard.mana:
                     # Not enough mana to cast this particular spell
                     continue
+                
+                if Wizard.spell_list[i]['spell_name']+"'s timer is now" in ret_val:
+                    if Wizard.spell_list[i]['spell_name']+"'s timer is now 0" not in ret_val:
+                        continue
                 if i < 4:
                     # make a new deep copy
                     new_game = copy.deepcopy(this_game)
@@ -156,6 +158,9 @@ def play_game(game_list):
                 # cast a spell
                 new_game.wizard.mana -= spell_mana_cost
                 new_game.wizard.mana_spent += spell_mana_cost
+                if new_game.wizard.mana_spent >= Game.min_mana_win:
+                    # Discard new_game if its mana won't be less than the already known global minimum
+                    continue
                 if new_game.rounds_to_show != []:
                     popped_spell = new_game.rounds_to_show.pop(0)
                     if Wizard.spell_list[i]['spell_name'] != popped_spell:
@@ -170,7 +175,6 @@ def play_game(game_list):
                 # Return object has message or changes to instance variables of boss object
                 ret_obj = getattr(new_game.wizard, 'cast_' + Wizard.spell_list[i]['spell_name'])()
                 for key, val in ret_obj.items():
-                    dummy = 123
                     if key == 'message':
                         if new_game.rounds_to_show != []:
                             print(val)
@@ -188,7 +192,6 @@ def play_game(game_list):
                 new_game.round_number += 1
                 # put back on the list
                 game_list.insert(0, new_game)
-                dummy = 123
         
         else:
             # Commands for boss' turn
@@ -196,7 +199,6 @@ def play_game(game_list):
                 print(ret_val)
             this_game.round_number += 1
             game_list.insert(0, this_game)
-            dummy = 123
 
     print(f'\nThe minimum mana that can be spent on a win is {Game.min_mana_win}\n')
 
@@ -217,7 +219,7 @@ def test_partA_graded():
     play_game(game_list)
 
 # test_sample_zero()
-test_sample_one()
+# test_sample_one()
 
-
+test_partA_graded()
 
