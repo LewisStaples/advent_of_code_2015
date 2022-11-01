@@ -1,0 +1,7 @@
+To continue, please consult the code grid in the manual.  Enter the code at row 1, column 1.
+To continue, please consult the code grid in the manual.  Enter the code at row 2, column 1.
+To continue, please consult the code grid in the manual.  Enter the code at row 1, column 2.
+To continue, please consult the code grid in the manual.  Enter the code at row 3, column 1.
+To continue, please consult the code grid in the manual.  Enter the code at row 2, column 2.
+To continue, please consult the code grid in the manual.  Enter the code at row 1, column 3.
+To continue, please consult the code grid in the manual.  Enter the code at row 4, column 1.
